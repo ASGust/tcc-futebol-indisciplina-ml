@@ -266,3 +266,10 @@ Colunas da base final:
 - total_gols
 
 A coluna 'arbitro' permanece na base final, embora não seja utilizada como atributo do modelo.
+
+================================================================================
+9. ENCAMINHAMENTO PARA A ETAPA 4
+================================================================================
+
+A base tratada salva em dados/processados/base_tratada.csv constitui a entrada para a próxima etapa do projeto.
+As decisões sobre eventuais ausências estatísticas remanescentes não foram tomadas automaticamente quando foram identificados registros incompletos; essas linhas foram apenas documentadas para avaliação metodológica.
