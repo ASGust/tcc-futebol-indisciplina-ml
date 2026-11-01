@@ -35,9 +35,10 @@ próprio dentro de `prepare/`.
 | 1. Download com cache | `prepare/etapa1_download.py` | Concluída |
 | 2. Unificação da base | `prepare/etapa2_unificacao.py` | Concluída |
 | 3. Análise de disponibilidade e limpeza | `prepare/etapa3_disponibilidade.py` | Concluída |
-| 4. Engenharia de atributos | `prepare/etapa4_atributos.py` | Em andamento |
-| 5. Construção e treinamento dos modelos | — | Pendente |
-| 6. Avaliação e análise dos resultados | — | Pendente |
+| 4. Engenharia de atributos | `prepare/etapa4_atributos.py` | Concluída |
+| 5. Seleção final de colunas | `prepare/etapa5_selecao_final.py` | Concluída |
+| 6. Construção e treinamento dos modelos (modelagem, etapa futura separada da preparação de dados) | — | Pendente |
+| 7. Avaliação e análise dos resultados | — | Pendente |
 
 ### Resumo das decisões já tomadas (Etapas 1 a 3)
 - Foi confirmado empiricamente que a fonte **não disponibiliza** dados
@@ -67,10 +68,12 @@ tcc-futebol-indisciplina-ml/
 │   ├── etapa1_download.py
 │   ├── etapa2_unificacao.py
 │   ├── etapa3_disponibilidade.py
-│   └── etapa4_atributos.py          # em construção
+│   ├── etapa4_atributos.py          # concluída
+│   └── etapa5_selecao_final.py
 ├── dados/                           # criada automaticamente pelo código
 │   ├── brutos/                      # CSVs originais baixados da fonte
-│   └── processados/                 # bases unificada e tratada
+│   └── processados/                 # bases unificada, tratada, com atributos e final
+│       └── base_final.csv           # base final para modelagem (Etapa 5)
 ├── resultados/
 │   └── tabelas/                     # relatórios e tabelas geradas
 ├── notebooks/                       # análises exploratórias (opcional)

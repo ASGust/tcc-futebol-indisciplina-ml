@@ -8,6 +8,10 @@
         "arbitro",
         "resultado"
     ],
+    "atributos_pre_jogo_data": [
+        "dia_semana",
+        "mes"
+    ],
     "atributos_partida_atual_NAO_USAR_EM_MODELO_PREDITIVO": [
         "pontos_mandante",
         "pontos_visitante",
@@ -18,8 +22,6 @@
         "disciplina_por_falta_visitante",
         "eficiencia_finalizacao_mandante",
         "eficiencia_finalizacao_visitante",
-        "dia_semana",
-        "mes",
         "gols_mandante",
         "gols_visitante",
         "chutes_mandante",

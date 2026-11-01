@@ -858,19 +858,24 @@ def gerar_relatorio_ausencias(
 
 def gerar_categorizacao_colunas(base):
     """
-    Categoriza as colunas da base final em quatro grupos:
+    Categoriza as colunas da base final em cinco grupos:
 
     1. identificacao
-    2. atributos_partida_atual_NAO_USAR_EM_MODELO_PREDITIVO
-    3. janelas_disciplinares
-    4. janelas_desempenho_estilo
+    2. atributos_pre_jogo_data
+    3. atributos_partida_atual_NAO_USAR_EM_MODELO_PREDITIVO
+    4. janelas_disciplinares
+    5. janelas_desempenho_estilo
+
+    As colunas de atributos_pre_jogo_data (dia da semana e mês)
+    vêm apenas da data do calendário, conhecida antes da partida,
+    e por isso PODEM ser utilizadas em modelo preditivo.
 
     A categorização é utilizada posteriormente na Etapa 5
     para montar os conjuntos de variáveis dos modelos com
     e sem atributos de indisciplina.
 
     Retorna:
-        Dicionário com as quatro categorias de colunas.
+        Dicionário com as cinco categorias de colunas.
     """
 
     identificacao = [
@@ -883,6 +888,13 @@ def gerar_categorizacao_colunas(base):
         "resultado"
     ]
 
+    # Atributos derivados somente da data da partida: são
+    # conhecidos antes do jogo, portanto não há vazamento.
+    atributos_pre_jogo_data = [
+        "dia_semana",
+        "mes"
+    ]
+
     atributos_parte1 = [
         "pontos_mandante",
         "pontos_visitante",
@@ -892,9 +904,7 @@ def gerar_categorizacao_colunas(base):
         "disciplina_por_falta_mandante",
         "disciplina_por_falta_visitante",
         "eficiencia_finalizacao_mandante",
-        "eficiencia_finalizacao_visitante",
-        "dia_semana",
-        "mes"
+        "eficiencia_finalizacao_visitante"
     ]
 
     estatisticas_brutas = [
@@ -963,6 +973,7 @@ def gerar_categorizacao_colunas(base):
 
     categorizacao = {
         "identificacao": identificacao,
+        "atributos_pre_jogo_data": atributos_pre_jogo_data,
         "atributos_partida_atual_NAO_USAR_EM_MODELO_PREDITIVO":
             atributos_atual,
         "janelas_disciplinares":

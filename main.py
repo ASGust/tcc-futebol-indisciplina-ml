@@ -1,5 +1,5 @@
 #PIPELINE COMPLETO DO PROJETO
-# Encadeia as Etapas 1 a 4, repassando o DataFrame de uma etapa
+# Encadeia as Etapas 1 a 5, repassando o DataFrame de uma etapa
 # para a próxima. Cada etapa só roda se a anterior for bem-sucedida.
 #
 # Execução (a partir da raiz do projeto):
@@ -14,6 +14,10 @@ from prepare.etapa4_atributos import (
     calcular_atributos_derivados,
     calcular_janelas_deslizantes,
     ARQUIVO_SAIDA as ARQUIVO_BASE_ATRIBUTOS
+)
+from prepare.etapa5_selecao_final import (
+    gerar_base_final,
+    ARQUIVO_SAIDA as ARQUIVO_BASE_FINAL
 )
 
 
@@ -40,7 +44,7 @@ def interromper(mensagem):
 def main():
 
     # ETAPA 1 — DOWNLOAD
-    print("\n[main] Etapa 1/4: download...")
+    print("\n[main] Etapa 1/5: download...")
 
     resumo_download = baixar_todos_os_arquivos()
 
@@ -56,7 +60,7 @@ def main():
 
 
     # ETAPA 2 — UNIFICAÇÃO
-    print("\n[main] Etapa 2/4: unificação...")
+    print("\n[main] Etapa 2/5: unificação...")
 
     base_unificada = unificar_arquivos()
 
@@ -68,7 +72,7 @@ def main():
 
 
     # ETAPA 3 — DISPONIBILIDADE E LIMPEZA
-    print("\n[main] Etapa 3/4: disponibilidade e limpeza...")
+    print("\n[main] Etapa 3/5: disponibilidade e limpeza...")
 
     try:
         base_tratada = analisar_disponibilidade(base_unificada)
@@ -78,23 +82,24 @@ def main():
 
 
     # ETAPA 4 — ENGENHARIA DE ATRIBUTOS
-    print("\n[main] Etapa 4/4: engenharia de atributos...")
+    print("\n[main] Etapa 4/5: engenharia de atributos...")
 
     try:
         # Parte 1 — atributos derivados por partida
         base_com_atributos = calcular_atributos_derivados(base_tratada)
 
         # Parte 2 — janelas deslizantes (também salva a categorização)
-        base_final = calcular_janelas_deslizantes(base_com_atributos)
+        base_atributos = calcular_janelas_deslizantes(base_com_atributos)
 
-        # A função da Parte 2 não salva a base final; o salvamento
-        # é feito aqui, no mesmo arquivo e codificação da Etapa 4.
+        # A função da Parte 2 não salva a base de atributos; o
+        # salvamento é feito aqui, no mesmo arquivo e codificação
+        # da Etapa 4.
         ARQUIVO_BASE_ATRIBUTOS.parent.mkdir(
             parents=True,
             exist_ok=True
         )
 
-        base_final.to_csv(
+        base_atributos.to_csv(
             ARQUIVO_BASE_ATRIBUTOS,
             index=False,
             encoding="utf-8-sig"
@@ -102,6 +107,16 @@ def main():
 
     except Exception as erro:
         interromper(f"Falha na Etapa 4: {erro}")
+
+
+    # ETAPA 5 — SELEÇÃO FINAL DE COLUNAS
+    print("\n[main] Etapa 5/5: seleção final de colunas...")
+
+    try:
+        base_final = gerar_base_final(base_atributos)
+
+    except Exception as erro:
+        interromper(f"Falha na Etapa 5: {erro}")
 
 
     # RESUMO FINAL
@@ -118,6 +133,7 @@ def main():
     print("\nArquivos principais gerados:")
     print(f" - {ARQUIVO_BASE_ATRIBUTOS.as_posix()}")
     print(f" - {ARQUIVO_CATEGORIZACAO.as_posix()}")
+    print(f" - {ARQUIVO_BASE_FINAL.as_posix()}")
     print("=" * 70)
 
 
