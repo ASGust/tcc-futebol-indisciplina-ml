@@ -27,15 +27,15 @@ O projeto utiliza técnicas de análise de dados e aprendizado de máquina
 supervisionado para identificar padrões entre indicadores disciplinares
 e resultados de partidas. O pipeline de dados foi construído em etapas
 sequenciais e independentes, cada uma implementada como um script
-próprio dentro de `src/`.
+próprio dentro de `prepare/`.
 
 ### Etapas do pipeline
 | Etapa | Script | Status |
 |---|---|---|
-| 1. Download com cache | `src/etapa1_download.py` | Concluída |
-| 2. Unificação da base | `src/etapa2_unificacao.py` | Concluída |
-| 3. Análise de disponibilidade e limpeza | `src/etapa3_disponibilidade.py` | Concluída |
-| 4. Engenharia de atributos | `src/etapa4_atributos.py` | Em andamento |
+| 1. Download com cache | `prepare/etapa1_download.py` | Concluída |
+| 2. Unificação da base | `prepare/etapa2_unificacao.py` | Concluída |
+| 3. Análise de disponibilidade e limpeza | `prepare/etapa3_disponibilidade.py` | Concluída |
+| 4. Engenharia de atributos | `prepare/etapa4_atributos.py` | Em andamento |
 | 5. Construção e treinamento dos modelos | — | Pendente |
 | 6. Avaliação e análise dos resultados | — | Pendente |
 
@@ -63,7 +63,7 @@ O relatório completo dessa análise está em
 ```
 tcc-futebol-indisciplina-ml/
 ├── main.py                          # executa o pipeline em sequência
-├── src/
+├── prepare/
 │   ├── etapa1_download.py
 │   ├── etapa2_unificacao.py
 │   ├── etapa3_disponibilidade.py
@@ -93,7 +93,7 @@ tcc-futebol-indisciplina-ml/
    ```
    Ou execute uma etapa individualmente, por exemplo:
    ```
-   python src/etapa3_disponibilidade.py
+   python prepare/etapa3_disponibilidade.py
    ```
    (nesse caso, a etapa lê a base já processada em
    `dados/processados/`, sem precisar rodar as etapas anteriores).

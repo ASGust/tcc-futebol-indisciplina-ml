@@ -7,10 +7,10 @@
 import sys
 from pathlib import Path
 
-from src.etapa1_download import baixar_todos_os_arquivos
-from src.etapa2_unificacao import unificar_arquivos
-from src.etapa3_disponibilidade import analisar_disponibilidade
-from src.etapa4_atributos import (
+from prepare.etapa1_download import baixar_todos_os_arquivos
+from prepare.etapa2_unificacao import unificar_arquivos
+from prepare.etapa3_disponibilidade import analisar_disponibilidade
+from prepare.etapa4_atributos import (
     calcular_atributos_derivados,
     calcular_janelas_deslizantes,
     ARQUIVO_SAIDA as ARQUIVO_BASE_ATRIBUTOS
