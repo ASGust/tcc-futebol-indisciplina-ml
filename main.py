@@ -1,142 +1,126 @@
-#PIPELINE COMPLETO DO PROJETO
-# Encadeia as Etapas 1 a 5, repassando o DataFrame de uma etapa
-# para a próxima. Cada etapa só roda se a anterior for bem-sucedida.
+# FULL PROJECT PIPELINE
+# Chains Steps 1 to 6, passing each step's DataFrame on to the
+# next one. Each step only runs if the previous one succeeded.
 #
-# Execução (a partir da raiz do projeto):
+# Run from the project root:
 #   python main.py
 import sys
-from pathlib import Path
 
-from prepare.etapa1_download import baixar_todos_os_arquivos
-from prepare.etapa2_unificacao import unificar_arquivos
-from prepare.etapa3_disponibilidade import analisar_disponibilidade
-from prepare.etapa4_atributos import (
-    calcular_atributos_derivados,
-    calcular_janelas_deslizantes,
-    ARQUIVO_SAIDA as ARQUIVO_BASE_ATRIBUTOS
+from prepare.step1_download import download_all_files
+from prepare.step2_unification import unify_files
+from prepare.step3_availability import analyze_availability
+from prepare.step4_derived_attributes import calculate_derived_attributes
+from prepare.step5_rolling_windows import (
+    calculate_rolling_windows,
+    OUTPUT_FILE as ATTRIBUTES_BASE_FILE,
+    CATEGORIZATION_FILE
 )
-from prepare.etapa5_selecao_final import (
-    gerar_base_final,
-    ARQUIVO_SAIDA as ARQUIVO_BASE_FINAL
-)
-
-
-#CONFIGURAÇÕES
-# Arquivo de categorização gerado pela Parte 2 da Etapa 4
-ARQUIVO_CATEGORIZACAO = Path(
-    "resultados/tabelas/categorizacao_colunas.json"
+from prepare.step6_final_selection import (
+    select_final_columns,
+    OUTPUT_FILE as FINAL_BASE_FILE
 )
 
 
-def interromper(mensagem):
+def stop_pipeline(message):
     """
-    Avisa em qual ponto o pipeline parou e encerra o programa
-    com código de erro, para que nenhuma etapa seguinte rode.
+    Reports where the pipeline stopped and exits with an error
+    code, so no later step runs.
     """
 
-    print(f"\n[main] [ERRO] {mensagem}")
-    print("[main] Pipeline interrompido.")
+    print(f'\n[main] [ERROR] {message}')
+    print('[main] Pipeline stopped.')
 
     sys.exit(1)
 
 
-#PROGRAMA PRINCIPAL
+# MAIN PROGRAM
 def main():
 
-    # ETAPA 1 — DOWNLOAD
-    print("\n[main] Etapa 1/5: download...")
+    # STEP 1 - DOWNLOAD
+    print('\n[main] Step 1/6: download...')
 
-    resumo_download = baixar_todos_os_arquivos()
+    download_summary = download_all_files()
 
-    # Sem arquivos baixados nem em cache, não há o que unificar.
-    arquivos_disponiveis = (
-        resumo_download["baixados"] + resumo_download["cache"]
-    )
+    # Nothing to unify without downloaded or cached files
+    if download_summary['downloaded'] + download_summary['cached'] == 0:
+        stop_pipeline('No CSV file available (0 downloaded and 0 cached).')
 
-    if arquivos_disponiveis == 0:
-        interromper(
-            "Nenhum arquivo CSV disponível (0 baixados e 0 em cache)."
+    # STEP 2 - UNIFICATION
+    print('\n[main] Step 2/6: unification...')
+
+    unified_base = unify_files()
+
+    if unified_base is None:
+        stop_pipeline(
+            'Unification produced no base (no CSV found '
+            'or none could be processed).'
         )
 
-
-    # ETAPA 2 — UNIFICAÇÃO
-    print("\n[main] Etapa 2/5: unificação...")
-
-    base_unificada = unificar_arquivos()
-
-    if base_unificada is None:
-        interromper(
-            "A unificação não gerou base (nenhum CSV encontrado "
-            "ou nenhum pôde ser processado)."
-        )
-
-
-    # ETAPA 3 — DISPONIBILIDADE E LIMPEZA
-    print("\n[main] Etapa 3/5: disponibilidade e limpeza...")
+    # STEP 3 - AVAILABILITY AND CLEANING
+    print('\n[main] Step 3/6: availability and cleaning...')
 
     try:
-        base_tratada = analisar_disponibilidade(base_unificada)
+        clean_base = analyze_availability(unified_base)
 
-    except Exception as erro:
-        interromper(f"Falha na Etapa 3: {erro}")
+    except Exception as error:
+        stop_pipeline(f'Step 3 failed: {error}')
 
-
-    # ETAPA 4 — ENGENHARIA DE ATRIBUTOS
-    print("\n[main] Etapa 4/5: engenharia de atributos...")
+    # STEP 4 - DERIVED ATTRIBUTES
+    print('\n[main] Step 4/6: derived attributes...')
 
     try:
-        # Parte 1 — atributos derivados por partida
-        base_com_atributos = calcular_atributos_derivados(base_tratada)
+        base_with_attributes = calculate_derived_attributes(clean_base)
 
-        # Parte 2 — janelas deslizantes (também salva a categorização)
-        base_atributos = calcular_janelas_deslizantes(base_com_atributos)
+    except Exception as error:
+        stop_pipeline(f'Step 4 failed: {error}')
 
-        # A função da Parte 2 não salva a base de atributos; o
-        # salvamento é feito aqui, no mesmo arquivo e codificação
-        # da Etapa 4.
-        ARQUIVO_BASE_ATRIBUTOS.parent.mkdir(
-            parents=True,
-            exist_ok=True
-        )
+    # STEP 5 - ROLLING WINDOWS
+    print('\n[main] Step 5/6: rolling windows...')
 
-        base_atributos.to_csv(
-            ARQUIVO_BASE_ATRIBUTOS,
+    try:
+        # Also saves the column categorization
+        attributes_base = calculate_rolling_windows(base_with_attributes)
+
+        # Step 5 does not save the attributes base itself, so it is
+        # saved here with the same file and encoding as the step
+        ATTRIBUTES_BASE_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+        attributes_base.to_csv(
+            ATTRIBUTES_BASE_FILE,
             index=False,
-            encoding="utf-8-sig"
+            encoding='utf-8-sig'
         )
 
-    except Exception as erro:
-        interromper(f"Falha na Etapa 4: {erro}")
+    except Exception as error:
+        stop_pipeline(f'Step 5 failed: {error}')
 
-
-    # ETAPA 5 — SELEÇÃO FINAL DE COLUNAS
-    print("\n[main] Etapa 5/5: seleção final de colunas...")
+    # STEP 6 - FINAL COLUMN SELECTION
+    print('\n[main] Step 6/6: final column selection...')
 
     try:
-        base_final = gerar_base_final(base_atributos)
+        final_base = select_final_columns(attributes_base)
 
-    except Exception as erro:
-        interromper(f"Falha na Etapa 5: {erro}")
+    except Exception as error:
+        stop_pipeline(f'Step 6 failed: {error}')
 
-
-    # RESUMO FINAL
-    print("\n" + "=" * 70)
-    print("[main] PIPELINE CONCLUÍDO")
-    print("=" * 70)
+    # FINAL SUMMARY
+    print('\n' + '=' * 70)
+    print('[main] PIPELINE COMPLETED')
+    print('=' * 70)
 
     print(
-        f"Dimensões finais da base: "
-        f"{len(base_final)} linhas x "
-        f"{len(base_final.columns)} colunas"
+        f'Final base dimensions: '
+        f'{len(final_base)} rows x '
+        f'{len(final_base.columns)} columns'
     )
 
-    print("\nArquivos principais gerados:")
-    print(f" - {ARQUIVO_BASE_ATRIBUTOS.as_posix()}")
-    print(f" - {ARQUIVO_CATEGORIZACAO.as_posix()}")
-    print(f" - {ARQUIVO_BASE_FINAL.as_posix()}")
-    print("=" * 70)
+    print('\nMain files generated:')
+    print(f' - {ATTRIBUTES_BASE_FILE.as_posix()}')
+    print(f' - {CATEGORIZATION_FILE.as_posix()}')
+    print(f' - {FINAL_BASE_FILE.as_posix()}')
+    print('=' * 70)
 
 
-# EXECUTAR O PIPELINE
-if __name__ == "__main__":
+# RUN THE PIPELINE
+if __name__ == '__main__':
     main()

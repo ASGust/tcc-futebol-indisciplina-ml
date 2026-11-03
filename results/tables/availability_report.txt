@@ -1,0 +1,275 @@
+================================================================================
+DATA AVAILABILITY REPORT - STEP 3
+================================================================================
+
+This report documents the data availability analysis of the unified base and the cleaning decisions made in Step 3 of the project.
+
+================================================================================
+1. GHOST ROW CLEANING
+================================================================================
+
+Original rows: 18013
+Rows removed as ghosts: 2
+Rows after removing ghosts: 18011
+
+The rows identified as ghost records in the original CSV files were removed. The operational criterion used was a missing home_goals value, as found in the inspection done in the previous step.
+
+================================================================================
+2. REMOVAL OF REAL MATCHES WITHOUT STATISTICS
+================================================================================
+
+Real matches removed: 2
+
+Removed matches:
+league    season       date    home_team away_team  home_goals  away_goals
+    F1 2016/2017 2017-04-16       Bastia      Lyon         0.0         3.0
+    D1 2024/2025 2024-12-14 Union Berlin    Bochum         0.0         2.0
+
+The decision to remove these matches was made because the impact is statistically negligible: 2 out of 18,011 rows, equivalent to roughly 0.011% of the base after removing the ghost rows.
+
+These variables are central to the study, especially cards and fouls. No mean, median or zero imputation was used, since any of these alternatives would introduce an assumption about the discipline level of the matches without observed information that could methodologically support it.
+
+Furthermore, keeping missing values in these matches could propagate the problem to Step 4, especially when building the sliding windows of 3 to 7 matches, where missing values in the middle of the window could prevent or distort the calculation of the historical features.
+
+Therefore, the two real matches without statistics were removed, without imputing the missing values.
+
+================================================================================
+3. DATA AVAILABILITY - BEFORE CLEANING
+================================================================================
+
+              column  missing missing_pct
+              league        0       0.00%
+              season        0       0.00%
+                date        2       0.01%
+             referee    14213      78.90%
+           home_team        2       0.01%
+           away_team        2       0.01%
+          home_goals        2       0.01%
+          away_goals        2       0.01%
+              result        2       0.01%
+          home_shots        4       0.02%
+          away_shots        4       0.02%
+home_shots_on_target        4       0.02%
+away_shots_on_target        4       0.02%
+        home_corners        4       0.02%
+        away_corners        4       0.02%
+          home_fouls        4       0.02%
+          away_fouls        4       0.02%
+   home_yellow_cards        4       0.02%
+   away_yellow_cards        4       0.02%
+      home_red_cards        4       0.02%
+      away_red_cards        4       0.02%
+  total_yellow_cards        4       0.02%
+     total_red_cards        4       0.02%
+         total_fouls        4       0.02%
+         total_goals        2       0.01%
+
+================================================================================
+4. DATA AVAILABILITY - AFTER CLEANING
+================================================================================
+
+              column  missing missing_pct
+              league        0       0.00%
+              season        0       0.00%
+                date        0       0.00%
+             referee    14209      78.90%
+           home_team        0       0.00%
+           away_team        0       0.00%
+          home_goals        0       0.00%
+          away_goals        0       0.00%
+              result        0       0.00%
+          home_shots        0       0.00%
+          away_shots        0       0.00%
+home_shots_on_target        0       0.00%
+away_shots_on_target        0       0.00%
+        home_corners        0       0.00%
+        away_corners        0       0.00%
+          home_fouls        0       0.00%
+          away_fouls        0       0.00%
+   home_yellow_cards        0       0.00%
+   away_yellow_cards        0       0.00%
+      home_red_cards        0       0.00%
+      away_red_cards        0       0.00%
+  total_yellow_cards        0       0.00%
+     total_red_cards        0       0.00%
+         total_fouls        0       0.00%
+         total_goals        0       0.00%
+
+================================================================================
+5. REFEREE VARIABLE AVAILABILITY
+================================================================================
+
+The 'referee' column was kept in the base, but it will not be used as a feature of the machine learning model.
+
+The source analysis showed that referee data is available only for the Premier League (E0). For D1, F1, I1 and SP1, the column is not present in the raw files of these leagues. Therefore, these gaps are a limitation of the source availability, and not individual values that could be imputed.
+
+league    season  total_matches  missing_referees  present_referees present_referees_pct
+    D1 2015/2016            306               306                 0                0.00%
+    D1 2016/2017            306               306                 0                0.00%
+    D1 2017/2018            306               306                 0                0.00%
+    D1 2018/2019            306               306                 0                0.00%
+    D1 2019/2020            306               306                 0                0.00%
+    D1 2020/2021            306               306                 0                0.00%
+    D1 2021/2022            306               306                 0                0.00%
+    D1 2022/2023            306               306                 0                0.00%
+    D1 2023/2024            306               306                 0                0.00%
+    D1 2024/2025            305               305                 0                0.00%
+    E0 2015/2016            380                 0               380              100.00%
+    E0 2016/2017            380                 0               380              100.00%
+    E0 2017/2018            380                 0               380              100.00%
+    E0 2018/2019            380                 0               380              100.00%
+    E0 2019/2020            380                 0               380              100.00%
+    E0 2020/2021            380                 0               380              100.00%
+    E0 2021/2022            380                 0               380              100.00%
+    E0 2022/2023            380                 0               380              100.00%
+    E0 2023/2024            380                 0               380              100.00%
+    E0 2024/2025            380                 0               380              100.00%
+    F1 2015/2016            380               380                 0                0.00%
+    F1 2016/2017            379               379                 0                0.00%
+    F1 2017/2018            380               380                 0                0.00%
+    F1 2018/2019            380               380                 0                0.00%
+    F1 2019/2020            279               279                 0                0.00%
+    F1 2020/2021            380               380                 0                0.00%
+    F1 2021/2022            380               380                 0                0.00%
+    F1 2022/2023            380               380                 0                0.00%
+    F1 2023/2024            306               306                 0                0.00%
+    F1 2024/2025            306               306                 0                0.00%
+    I1 2015/2016            380               380                 0                0.00%
+    I1 2016/2017            380               380                 0                0.00%
+    I1 2017/2018            380               380                 0                0.00%
+    I1 2018/2019            380               380                 0                0.00%
+    I1 2019/2020            380               380                 0                0.00%
+    I1 2020/2021            380               380                 0                0.00%
+    I1 2021/2022            380               380                 0                0.00%
+    I1 2022/2023            380               380                 0                0.00%
+    I1 2023/2024            380               380                 0                0.00%
+    I1 2024/2025            380               380                 0                0.00%
+   SP1 2015/2016            380               380                 0                0.00%
+   SP1 2016/2017            380               380                 0                0.00%
+   SP1 2017/2018            380               380                 0                0.00%
+   SP1 2018/2019            380               380                 0                0.00%
+   SP1 2019/2020            380               380                 0                0.00%
+   SP1 2020/2021            380               380                 0                0.00%
+   SP1 2021/2022            380               380                 0                0.00%
+   SP1 2022/2023            380               380                 0                0.00%
+   SP1 2023/2024            380               380                 0                0.00%
+   SP1 2024/2025            380               380                 0                0.00%
+
+Methodological decision: the 'referee' variable will not be used as a model feature, since its availability is restricted to a single league. The column stays in the clean base to preserve the original information from the source.
+
+================================================================================
+6. NUMBER OF MATCHES PER LEAGUE AND SEASON
+================================================================================
+
+league    season  matches  expected  difference         status
+    D1 2015/2016      306       306           0             OK
+    D1 2016/2017      306       306           0             OK
+    D1 2017/2018      306       306           0             OK
+    D1 2018/2019      306       306           0             OK
+    D1 2019/2020      306       306           0             OK
+    D1 2020/2021      306       306           0             OK
+    D1 2021/2022      306       306           0             OK
+    D1 2022/2023      306       306           0             OK
+    D1 2023/2024      306       306           0             OK
+    D1 2024/2025      305       306          -1 OUT OF PATTERN
+    E0 2015/2016      380       380           0             OK
+    E0 2016/2017      380       380           0             OK
+    E0 2017/2018      380       380           0             OK
+    E0 2018/2019      380       380           0             OK
+    E0 2019/2020      380       380           0             OK
+    E0 2020/2021      380       380           0             OK
+    E0 2021/2022      380       380           0             OK
+    E0 2022/2023      380       380           0             OK
+    E0 2023/2024      380       380           0             OK
+    E0 2024/2025      380       380           0             OK
+    F1 2015/2016      380       380           0             OK
+    F1 2016/2017      379       380          -1 OUT OF PATTERN
+    F1 2017/2018      380       380           0             OK
+    F1 2018/2019      380       380           0             OK
+    F1 2019/2020      279       279           0             OK
+    F1 2020/2021      380       380           0             OK
+    F1 2021/2022      380       380           0             OK
+    F1 2022/2023      380       380           0             OK
+    F1 2023/2024      306       306           0             OK
+    F1 2024/2025      306       306           0             OK
+    I1 2015/2016      380       380           0             OK
+    I1 2016/2017      380       380           0             OK
+    I1 2017/2018      380       380           0             OK
+    I1 2018/2019      380       380           0             OK
+    I1 2019/2020      380       380           0             OK
+    I1 2020/2021      380       380           0             OK
+    I1 2021/2022      380       380           0             OK
+    I1 2022/2023      380       380           0             OK
+    I1 2023/2024      380       380           0             OK
+    I1 2024/2025      380       380           0             OK
+   SP1 2015/2016      380       380           0             OK
+   SP1 2016/2017      380       380           0             OK
+   SP1 2017/2018      380       380           0             OK
+   SP1 2018/2019      380       380           0             OK
+   SP1 2019/2020      380       380           0             OK
+   SP1 2020/2021      380       380           0             OK
+   SP1 2021/2022      380       380           0             OK
+   SP1 2022/2023      380       380           0             OK
+   SP1 2023/2024      380       380           0             OK
+   SP1 2024/2025      380       380           0             OK
+
+The number of matches is compared with the expected number for each league composition.
+
+The F1 2019/2020 season has 279 matches. This number is not treated as a reading error, since the season was interrupted and ended early due to the Covid-19 pandemic.
+
+The French Conseil d'État records that, due to the Covid-19 epidemic, the Ligue de Football Professionnel (LFP) decided on April 30, 2020 to definitively end the 2019/2020 season of Ligue 1 and Ligue 2. The decision took into account the health context and the impossibility of resuming the competitions under the conditions existing at the time.
+
+Main source: Conseil d'État, decision of June 9, 2020, "Ligue 1 de football : le juge des référés du Conseil d'État valide la fin de la saison et le classement mais suspend les relégations".
+https://conseil-etat.fr/actualites/ligue-1-de-football-le-juge-des-referes-du-conseil-d-etat-valide-la-fin-de-la-saison-et-le-classement-mais-suspend-les-relegations
+
+================================================================================
+7. REMAINING GAPS IN THE STATISTICAL VARIABLES
+================================================================================
+
+No missing values were found in the statistical columns after removing the ghost rows.
+
+================================================================================
+8. CLEAN BASE
+================================================================================
+
+Original rows: 18013
+After removing ghost rows: 18011
+After removing matches without statistics: 18009
+Rows removed as ghosts: 2
+Real matches without statistics removed: 2
+
+Columns of the final base:
+- league
+- season
+- date
+- referee
+- home_team
+- away_team
+- home_goals
+- away_goals
+- result
+- home_shots
+- away_shots
+- home_shots_on_target
+- away_shots_on_target
+- home_corners
+- away_corners
+- home_fouls
+- away_fouls
+- home_yellow_cards
+- away_yellow_cards
+- home_red_cards
+- away_red_cards
+- total_yellow_cards
+- total_red_cards
+- total_fouls
+- total_goals
+
+The 'referee' column stays in the final base, although it is not used as a model feature.
+
+================================================================================
+9. HANDOFF TO STEP 4
+================================================================================
+
+The clean base saved to data/processed/clean_base.csv is the input for the next step of the project.
+Decisions about any remaining statistical gaps were not made automatically when incomplete records were found; these rows were only documented for methodological review.
