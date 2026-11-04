@@ -1,7 +1,7 @@
 # DERIVED ATTRIBUTES
 #
-# Computes attributes derived from each match on its own,
-# without using information from any other match.
+# Computes attributes from each match on its own, without using any
+# other match.
 #
 # Input:
 # data/processed/clean_base.csv
@@ -35,9 +35,8 @@ CREATED_COLUMNS = [
 # HELPER FUNCTIONS
 def safe_ratio(numerator, denominator):
     """
-    Divides two columns, setting the result to zero when the
-    denominator is zero (0/0 gives NaN, x/0 gives infinity), so
-    no missing or infinite values are added to the base.
+    Divides two columns, returning zero when the denominator is zero, so
+    no NaN (0/0) or infinite (x/0) values are added.
     """
 
     return (
@@ -50,9 +49,8 @@ def safe_ratio(numerator, denominator):
 
 def calculate_points(base):
     """
-    Computes the points earned by the home and away teams in
-    each match, according to the result. Matches without a
-    known result get zero points.
+    Computes each team's points from the result; matches without a known
+    result get zero points.
     """
 
     base['home_points'] = base['result'].map(HOME_POINTS).fillna(0).astype(int)
@@ -63,8 +61,8 @@ def calculate_points(base):
 
 def calculate_indiscipline_indexes(base):
     """
-    Computes the weighted indiscipline index of each team
-    (yellow card = 1, red card = 2) and the match total.
+    Computes each team's indiscipline index (yellow = 1, red = 2) and the
+    match total.
     """
 
     base['home_indiscipline_index'] = (
@@ -83,10 +81,7 @@ def calculate_indiscipline_indexes(base):
 
 
 def calculate_discipline_per_foul(base):
-    """
-    Computes the ratio of cards to fouls committed by each team:
-    (yellow cards + red cards) / fouls.
-    """
+    """Computes each team's cards per foul: (yellow + red cards) / fouls."""
 
     base['home_discipline_per_foul'] = safe_ratio(
         base['home_yellow_cards'] + base['home_red_cards'],
@@ -102,10 +97,7 @@ def calculate_discipline_per_foul(base):
 
 
 def calculate_shot_efficiency(base):
-    """
-    Computes the shot efficiency of each team:
-    shots on target / total shots.
-    """
+    """Computes each team's shot efficiency: shots on target / shots."""
 
     base['home_shot_efficiency'] = safe_ratio(
         base['home_shots_on_target'],
@@ -121,10 +113,7 @@ def calculate_shot_efficiency(base):
 
 
 def calculate_time_attributes(base):
-    """
-    Extracts from the match date the weekday name (Monday to
-    Sunday) and the month number (1 to 12).
-    """
+    """Extracts the weekday name and the month number from the match date."""
 
     base['weekday'] = base['date'].dt.day_name()
     base['month'] = base['date'].dt.month
@@ -135,14 +124,8 @@ def calculate_time_attributes(base):
 # MAIN FUNCTION
 def calculate_derived_attributes(clean_base):
     """
-    Computes the Step 4 derived attributes.
-
-    The attributes come only from the match's own information;
-    none of them uses earlier or later matches.
-
-    Returns:
-        DataFrame with all the original columns plus the
-        attributes listed in CREATED_COLUMNS.
+    Runs Step 4: adds the CREATED_COLUMNS attributes, computed only from
+    each match's own data, and returns the base.
     """
 
     print('\n' + '=' * 70)

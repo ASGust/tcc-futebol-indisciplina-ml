@@ -1,13 +1,10 @@
 # FINAL COLUMN SELECTION
 #
-# Step 6 of the pipeline.
-# Reduces the 136 columns of the attributes base to the set
-# defined for modeling: identification/control columns, the date
-# attributes known before the match and the 100 rolling windows.
+# Step 6 of the pipeline: keeps the 108 modeling columns (identification,
+# pre-match date attributes and the 100 rolling windows).
 #
-# No row is removed. The window NaN values (each team's first
-# matches) are kept on purpose: they are handled in the experiments
-# step, once a window size is chosen.
+# No row is removed; the window NaN values are left for the experiments
+# step.
 #
 # Input:
 # data/processed/attributes_base.csv
@@ -22,8 +19,7 @@ from pathlib import Path
 INPUT_FILE = Path('data/processed/attributes_base.csv')
 OUTPUT_FILE = Path('data/processed/final_base.csv')
 
-# Includes the target (result) and the date attributes (weekday
-# and month), which are known before the match
+# Includes the target (result) and weekday/month, known before the match
 IDENTIFICATION_COLUMNS = [
     'league',
     'season',
@@ -56,8 +52,8 @@ WINDOW_SIZES = [3, 4, 5, 6, 7]
 
 def list_window_columns():
     """
-    Lists the 100 rolling window columns in the same order as the
-    attributes base: side, then window size, then statistic.
+    Lists the 100 window columns in the attributes base order: side, then
+    window size, then statistic.
     """
 
     return [
@@ -70,8 +66,8 @@ def list_window_columns():
 
 def check_columns_present(base, columns):
     """
-    Stops with an error if any expected column is missing, so an
-    incomplete final base is never produced silently.
+    Raises an error if any expected column is missing, so an incomplete
+    final base is never saved silently.
     """
 
     missing_columns = [
@@ -89,12 +85,8 @@ def check_columns_present(base, columns):
 
 def report_window_nan(base, window_columns):
     """
-    Prints the NaN count of each window column and, at the end,
-    the number of rows with at least one NaN per window size.
-    The rows are neither removed nor filled.
-
-    Returns:
-        Series with the NaN count per window column.
+    Prints the NaN count per window column and the rows with NaN per window
+    size, and returns the per-column counts.
     """
 
     nan_per_column = base[window_columns].isna().sum()
@@ -127,11 +119,7 @@ def report_window_nan(base, window_columns):
 
 # MAIN FUNCTION
 def select_final_columns(attributes_base):
-    """
-    Runs Step 6: selects the final columns for modeling, saves them
-    to disk and returns the resulting DataFrame, so main.py can
-    chain it.
-    """
+    """Runs Step 6: selects the final columns, saves them and returns them."""
 
     print('=' * 70)
     print('STEP 6 - FINAL COLUMN SELECTION')

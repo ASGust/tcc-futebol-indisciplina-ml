@@ -1,16 +1,11 @@
 # ROLLING WINDOWS OF HISTORICAL PERFORMANCE
 #
-# Takes the base with the Step 4 derived attributes and computes,
-# for each team, the averages of its 3 to 7 previous matches.
+# Computes each team's averages over its 3 to 7 previous matches.
 #
 # DATA LEAKAGE WARNING:
-# The Step 4 attributes and the raw match statistics describe what
-# happened DURING the match itself, so they must NOT be used as
-# inputs of a model that predicts that same match. Here they are
-# only raw material for averages of EARLIER matches: shift(1) before
-# rolling() keeps the current match out of its own history. Only the
-# window averages built here are candidate model inputs; the Step 4
-# attributes remain useful for exploratory and descriptive analysis.
+# Only earlier matches are used: shift(1) keeps the current match out of
+# its own history. Only these averages are candidate model inputs; the
+# Step 4 attributes stay available for exploratory analysis.
 #
 # Input:
 # data/processed/clean_base.csv (through the Step 4 attributes)
@@ -97,8 +92,8 @@ def window_column(statistic, window_size):
 
 def window_columns(window_sizes=WINDOW_SIZES):
     """
-    Lists the window average columns, window size first and
-    statistic second (e.g. points_avg_last3, ..., corners_avg_last7).
+    Lists the window columns by window size, then statistic
+    (points_avg_last3, ..., corners_avg_last7).
     """
 
     return [
@@ -110,16 +105,8 @@ def window_columns(window_sizes=WINDOW_SIZES):
 
 def build_team_history(base):
     """
-    Reshapes the match base into long format: each match gives
-    one row for the home team and one for the away team, so each
-    team's history can be followed whether it played at home or
-    away. The history is sorted by team and date.
-
-    The statistics in this table describe what happened in each
-    match; they are only used to build averages of earlier matches.
-
-    Returns:
-        Long DataFrame with one row per team and match.
+    Reshapes the base into long format (one row per team and match, home
+    or away), sorted by team and date.
     """
 
     side_histories = []
@@ -155,15 +142,8 @@ def build_team_history(base):
 
 def calculate_rolling_averages(team_history, window_sizes=WINDOW_SIZES):
     """
-    Computes each team's historical averages using only the
-    matches BEFORE the current one: shift(1) before rolling()
-    drops the current match and avoids data leakage.
-
-    min_periods equals the window size, so while a team does not
-    have enough previous matches the result stays NaN.
-
-    Returns:
-        DataFrame with the window averages added.
+    Adds each team's averages of its previous N matches (shift(1) excludes
+    the current one); NaN while the team has fewer than N matches.
     """
 
     history_with_averages = team_history.sort_values(
@@ -193,13 +173,8 @@ def calculate_rolling_averages(team_history, window_sizes=WINDOW_SIZES):
 
 def merge_history_into_base(base, history_with_averages):
     """
-    Brings the historical averages back to the match base,
-    prefixed by the team's side in the current match (home_* for
-    the home team, away_* for the away team). The join uses the
-    match id and the side, so each average goes to the right team.
-
-    Returns:
-        The original DataFrame with the historical averages added.
+    Adds the averages back to the match base, prefixed home_/away_ and
+    joined by match id and side.
     """
 
     result_base = base.copy()
@@ -228,9 +203,8 @@ def merge_history_into_base(base, history_with_averages):
 
 def check_data_leakage(base, team_history, sample_size=3):
     """
-    For a few randomly chosen matches, shows the home team's last
-    three earlier matches and confirms that every match used in
-    the history is strictly before the current one.
+    For a few sample matches, shows the home team's last 3 earlier matches
+    and checks they all come before the current one.
     """
 
     print('\n' + '-' * 70)
@@ -276,12 +250,8 @@ def check_data_leakage(base, team_history, sample_size=3):
 
 def build_missing_report(base, window_sizes=WINDOW_SIZES):
     """
-    For each window size, counts the rows with at least one NaN in
-    that window's averages and the distinct teams affected. The
-    rows are neither removed nor filled.
-
-    Returns:
-        Dictionary with the missing values summary per window.
+    Counts, per window size, the rows with NaN and the teams affected.
+    Rows are neither removed nor filled.
     """
 
     report = {}
@@ -323,22 +293,12 @@ def build_missing_report(base, window_sizes=WINDOW_SIZES):
 def build_column_categorization(base):
     """
     Splits the base columns into five groups:
-
     1. identification
-    2. pre_match_date_attributes
-    3. current_match_attributes_DO_NOT_USE_IN_PREDICTIVE_MODEL
-    4. disciplinary_windows
-    5. performance_style_windows
-
-    The pre_match_date_attributes (weekday and month) come only
-    from the calendar date, known before the match, so they CAN
-    be used in a predictive model.
-
-    The categorization is used later to build the model feature
-    sets with and without indiscipline attributes.
-
-    Returns:
-        Dictionary with the five column groups.
+    2. pre-match date attributes (weekday, month; usable in the model)
+    3. current match attributes (do not use as model input: data leakage)
+    4. disciplinary windows
+    5. performance windows
+    Used to build feature sets with and without indiscipline attributes.
     """
 
     identification = [
@@ -422,12 +382,7 @@ def build_column_categorization(base):
 
 
 def save_column_categorization(categorization):
-    """
-    Saves the column categorization as JSON.
-
-    Returns:
-        Path of the saved file.
-    """
+    """Saves the column categorization as JSON and returns its path."""
 
     CATEGORIZATION_FILE.parent.mkdir(parents=True, exist_ok=True)
 
@@ -440,18 +395,8 @@ def save_column_categorization(categorization):
 # MAIN FUNCTION
 def calculate_rolling_windows(base_with_attributes):
     """
-    Computes the rolling windows of historical performance:
-
-    1. builds the team history in long format;
-    2. computes the averages of the 3 to 7 previous matches;
-    3. brings the averages back to the match base;
-    4. checks for data leakage;
-    5. reports the missing values per window;
-    6. categorizes and saves the columns.
-
-    Returns:
-        Final DataFrame with the Step 4 attributes and the
-        historical windows added.
+    Runs Step 5: adds the 3 to 7 match windows, checks for leakage and
+    missing values, saves the column categorization and returns the base.
     """
 
     print('\n' + '=' * 70)
@@ -506,8 +451,8 @@ def calculate_rolling_windows(base_with_attributes):
 # RUN STEPS 4 AND 5 ON THEIR OWN
 if __name__ == '__main__':
 
-    # Imported here so main.py can import this module as part
-    # of the prepare package
+    # Imported here so main.py can still import this module from the
+    # prepare package
     from step4_derived_attributes import calculate_derived_attributes
 
     print('\nLoading the clean base...')

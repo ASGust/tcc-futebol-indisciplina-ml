@@ -45,10 +45,8 @@ MATCH_SUMMARY_COLUMNS = [
 
 def remove_empty_rows(unified_base):
     """
-    Removes the rows identified as ghost records.
-
-    A missing home_goals value is used as the criterion to
-    identify the fully empty rows seen in the raw files.
+    Removes the ghost records (fully empty rows of the raw files), using a
+    missing home_goals value as the criterion.
     """
 
     rows_before = len(unified_base)
@@ -69,10 +67,7 @@ def remove_empty_rows(unified_base):
 
 
 def build_availability_report(base):
-    """
-    Computes the count and percentage of missing values for
-    each column of the base.
-    """
+    """Counts the missing values of each column, in absolute and percent."""
 
     total_rows = len(base)
 
@@ -90,10 +85,7 @@ def build_availability_report(base):
 
 
 def expected_matches(league, season):
-    """
-    Returns the expected number of matches for each league and
-    season, given the known composition of the leagues.
-    """
+    """Returns the expected number of matches of a league and season."""
 
     # Bundesliga
     if league == 'D1':
@@ -116,11 +108,8 @@ def expected_matches(league, season):
 
 def build_diagnostics(base):
     """
-    Builds the diagnostics used to document the Step 3
-    decisions:
-    - referee availability per league and season;
-    - number of matches per league and season, compared with
-      the expected number.
+    Builds, per league and season, the referee availability and the match
+    count compared with the expected number.
     """
 
     referee_diagnostic = (
@@ -170,12 +159,8 @@ def build_diagnostics(base):
 
 def remove_matches_without_stats(base):
     """
-    Removes real matches with no information in any of the
-    statistical variables of interest.
-
-    Goals are left out of this criterion, since the identified
-    matches do have goals and result. A match is removed only
-    when all the other statistical variables are missing at once.
+    Removes real matches missing every statistic except goals (these
+    matches do have goals and result, so goals are not part of the check).
     """
 
     columns_to_check = [
@@ -212,10 +197,8 @@ def remove_matches_without_stats(base):
 
 def check_missing_stats(base):
     """
-    Finds records that still have missing values in the main
-    statistical columns of the study.
-
-    The rows found are not removed at this step.
+    Finds rows with missing values in the main statistical columns.
+    Rows are not removed here; they are only documented.
     """
 
     existing_columns = [
@@ -246,8 +229,8 @@ def build_report_text(
     rows_with_missing
 ):
     """
-    Builds the full Step 3 text report, recording the numbers,
-    diagnostics and methodological decisions of this step.
+    Builds the Step 3 text report: numbers, diagnostics and methodological
+    decisions.
     """
 
     lines = []
@@ -456,17 +439,8 @@ def build_report_text(
 # MAIN PROGRAM
 def analyze_availability(unified_base):
     """
-    Runs the Step 3 availability analysis.
-
-    Removes only the identified ghost rows and the matches
-    without statistics, builds the availability reports before
-    and after cleaning, documents the referee limitation, checks
-    the number of matches per league and season, records any
-    remaining statistical gaps and saves the clean base and the
-    text report.
-
-    Returns the clean DataFrame so it can be chained with the
-    next steps of the project.
+    Runs Step 3: removes ghost rows and matches without statistics, then
+    saves the clean base and the availability report and returns the base.
     """
 
     print('=' * 60)

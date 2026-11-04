@@ -12,8 +12,8 @@ OUTPUT_FILE = 'unified_base.csv'
 
 
 # COLUMN WHITELIST AND RENAMING
-# Only these source columns are read; the keys also define
-# the column order of the unified table.
+# Only these source columns are read; the key order is also the column
+# order of the unified table.
 COLUMN_RENAMES = {
     'Date': 'date',
     'Referee': 'referee',
@@ -55,13 +55,7 @@ MATCH_TOTALS = {
 
 
 def convert_season(season_code):
-    """
-    Converts the season code to the YYYY/YYYY format.
-
-    Examples:
-    1516 -> 2015/2016
-    2021 -> 2020/2021
-    """
+    """Converts a season code to YYYY/YYYY (e.g. 1516 -> 2015/2016)."""
 
     start_year = 2000 + int(season_code[:2])
     end_year = 2000 + int(season_code[2:])
@@ -71,9 +65,8 @@ def convert_season(season_code):
 
 def collect_headers(files):
     """
-    Reads only the headers of the CSV files and returns the
-    union of all columns found, to inspect what the raw files
-    contain before processing any data.
+    Returns the union of the column names of all raw files, reading only
+    their headers, to inspect the source before processing any data.
     """
 
     all_columns = set()
@@ -94,9 +87,7 @@ def collect_headers(files):
 
 
 def check_possession_and_passes(columns):
-    """
-    Looks for header names related to ball possession and passes.
-    """
+    """Looks for header names related to ball possession and passes."""
 
     possession_columns = [
         column
@@ -131,16 +122,13 @@ def check_possession_and_passes(columns):
 
 def read_file(file):
     """
-    Reads a CSV using only the allowed columns.
-
-    Any allowed column missing from the file is created with
-    missing values (NaN).
+    Reads a CSV keeping only the allowed columns; any allowed column
+    missing from the file is created with NaN.
     """
 
     header = pd.read_csv(file, encoding='latin-1', nrows=0)
 
-    # Strip header names so an extra space in a single file
-    # does not break the comparison
+    # Stripped so an extra space in one file does not break the comparison
     existing_columns = [column.strip() for column in header.columns]
 
     columns_to_read = [
@@ -162,12 +150,7 @@ def read_file(file):
 
 
 def add_league_and_season(table, file):
-    """
-    Gets the league and season from the file name.
-
-    Example:
-    E0_2324.csv -> league = E0, season = 2023/2024
-    """
+    """Gets league and season from the file name (E0_2324 -> E0, 2023/2024)."""
 
     league, season_code = file.stem.split('_')
 
@@ -179,9 +162,8 @@ def add_league_and_season(table, file):
 
 def create_match_totals(table):
     """
-    Creates the match totals of yellow cards, red cards, fouls
-    and goals. If either of the two values is missing, the total
-    is also missing.
+    Creates the match totals of yellow cards, red cards, fouls and goals.
+    If either side's value is missing, the total is missing too.
     """
 
     for total_column, (home_column, away_column) in MATCH_TOTALS.items():
@@ -209,10 +191,8 @@ def standardize_date(table):
 # MAIN PROGRAM
 def unify_files():
     """
-    Runs the full Step 2: reads the raw CSVs, builds the
-    unified table, saves it to disk and returns the resulting
-    DataFrame, so other scripts (such as the project's main.py)
-    can use it without reloading the saved file.
+    Runs Step 2: builds the unified table from the raw CSVs, saves it and
+    returns it.
     """
 
     print('=' * 60)

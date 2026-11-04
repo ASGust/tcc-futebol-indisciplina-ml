@@ -34,12 +34,8 @@ RAW_DATA_DIR = Path('data/raw')
 # MAIN PROGRAM
 def download_all_files():
     """
-    Downloads every CSV file for LEAGUES x SEASONS, skipping
-    the ones already on disk (cache).
-
-    Returns a dictionary summarizing the download, so the
-    project's main.py can decide whether to move on to the
-    next step (for example, not continuing if everything failed).
+    Downloads the CSV of every league and season, skipping cached files.
+    Returns the download counts so main.py can decide whether to go on.
     """
 
     RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)

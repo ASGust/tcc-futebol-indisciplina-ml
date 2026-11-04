@@ -1,9 +1,6 @@
 # FULL PROJECT PIPELINE
-# Chains Steps 1 to 6, passing each step's DataFrame on to the
-# next one. Each step only runs if the previous one succeeded.
-#
-# Run from the project root:
-#   python main.py
+# Chains Steps 1 to 6; each step only runs if the previous one succeeded.
+# Run from the project root: python main.py
 import sys
 
 from prepare.step1_download import download_all_files
@@ -22,10 +19,7 @@ from prepare.step6_final_selection import (
 
 
 def stop_pipeline(message):
-    """
-    Reports where the pipeline stopped and exits with an error
-    code, so no later step runs.
-    """
+    """Reports where the pipeline stopped and exits with an error code."""
 
     print(f'\n[main] [ERROR] {message}')
     print('[main] Pipeline stopped.')
@@ -82,7 +76,7 @@ def main():
         attributes_base = calculate_rolling_windows(base_with_attributes)
 
         # Step 5 does not save the attributes base itself, so it is
-        # saved here with the same file and encoding as the step
+        # saved here with the step's file name and encoding
         ATTRIBUTES_BASE_FILE.parent.mkdir(parents=True, exist_ok=True)
 
         attributes_base.to_csv(
